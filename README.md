@@ -1,5 +1,5 @@
-# market_alerts
-quick tool to register and fire market alerts (price) to a telegram channel
+# quick_alerts
+A quick tool to register and fire market alerts (price) to a telegram channel
 
 # Follow How-To create telegram bot and channel 
 https://www.directual.com/lesson-library/how-to-create-a-telegram-bot
