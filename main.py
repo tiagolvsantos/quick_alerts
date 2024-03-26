@@ -3,31 +3,18 @@ import requests
 import yfinance as yf
 
 def read_config(file_path):
-    """
-    Reads the configuration file and returns the alerts, telegram bot token, and telegram chat ID.
-
-    Args:
-        file_path (str): The path to the configuration file.
-
-    Returns:
-        tuple: A tuple containing the alerts (list), telegram bot token (str), and telegram chat ID (str).
-    """
     with open(file_path, 'r') as file:
         config = json.load(file)
-    return config['alerts'], config['telegram_bot_token'], config['telegram_chat_id']
+    return config['telegram_bot_token'], config['telegram_chat_id']
 
-def write_config(file_path, alerts, bot_token, chat_id):
-    """
-    Writes the alerts, telegram bot token, and telegram chat ID to the configuration file.
+def read_alerts(file_path):
+    with open(file_path, 'r') as file:
+        alerts = json.load(file)
+    return alerts
 
-    Args:
-        file_path (str): The path to the configuration file.
-        alerts (list): The list of alerts.
-        bot_token (str): The telegram bot token.
-        chat_id (str): The telegram chat ID.
-    """
+def write_alerts(file_path, alerts):
     with open(file_path, 'w') as file:
-        json.dump({'alerts': alerts, 'telegram_bot_token': bot_token, 'telegram_chat_id': chat_id}, file)
+        json.dump(alerts, file)
 
 def get_stock_price(stock):
     """
@@ -73,15 +60,16 @@ def add_alert():
             print("Invalid move. Please enter 'above' or 'below'.")
     reason = input('Enter the reason for the alert: ').lower()
     alert = {'stock': stock, 'level': level, 'move': move, 'reason': reason}
-    alerts, bot_token, chat_id = read_config('config.json')
+    alerts = read_alerts('alerts.json')
     alerts.append(alert)
-    write_config('config.json', alerts, bot_token, chat_id)
+    write_alerts('alerts.json', alerts)
 
 def run_alerts():
     """
     Runs the alerts and sends Telegram messages if the stock price meets the alert criteria.
     """
-    alerts, bot_token, chat_id = read_config('config.json')
+    bot_token, chat_id = read_config('config.json')
+    alerts = read_alerts('alerts.json')
     for alert in alerts:
         stock = alert['stock']
         level = alert['level']
@@ -98,8 +86,8 @@ def delete_all_alerts():
     """
     confirmation = input('Are you sure you want to delete all alerts? (yes/no): ').lower()
     if confirmation == 'yes':
-        _, bot_token, chat_id = read_config('config.json')
-        write_config('config.json', [], bot_token, chat_id)
+        _ = read_alerts('alerts.json')
+        write_alerts('alerts.json', [])
     else:
         print("Operation cancelled.")
 
@@ -107,7 +95,7 @@ def print_all_alerts():
     """
     Prints all alerts from the configuration file.
     """
-    alerts, _, _ = read_config('config.json')
+    alerts = read_alerts('alerts.json')
     for alert in alerts:
         print(f"Stock: {alert['stock']}, Level: {alert['level']}, Move: {alert['move']}")
 
@@ -115,10 +103,10 @@ def delete_alerts_for_stock():
     """
     Deletes all alerts for a specific stock from the configuration file.
     """
-    stock = input('Enter the stock symbol: ')
-    alerts, bot_token, chat_id = read_config('config.json')
+    stock = input('Enter the stock symbol: ').upper()
+    alerts = read_alerts('alerts.json')
     alerts = [alert for alert in alerts if alert['stock'] != stock]
-    write_config('config.json', alerts, bot_token, chat_id)
+    write_alerts('alerts.json', alerts)
 
 def main():
     """
