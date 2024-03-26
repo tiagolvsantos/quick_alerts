@@ -40,7 +40,10 @@ def get_stock_price(stock):
         float: The last price of the stock.
     """
     ticker = yf.Ticker(stock)
-    return ticker.fast_info['lastPrice']
+    try:
+        return ticker.fast_info['lastPrice']
+    except KeyError:
+        return None
 
 def send_telegram_message(bot_token, chat_id, message):
     """
@@ -58,11 +61,20 @@ def add_alert():
     """
     Adds a new alert to the configuration file.
     """
-    stock = input('Enter stock symbol: ').upper()
-    level = float(input('Enter level: '))
-    move = input('Enter move (above/below): ').lower()
+    stock = input('Enter the stock symbol: ')
+    if get_stock_price(stock) is None:
+        print(f"Stock {stock} does not exist.")
+        return
+    level = float(input('Enter the price level: '))
+    move = ''
+    while move not in ['above', 'below']:
+        move = input('Enter the move (above/below): ').lower()
+        if move not in ['above', 'below']:
+            print("Invalid move. Please enter 'above' or 'below'.")
+    reason = input('Enter the reason for the alert: ').lower()
+    alert = {'stock': stock, 'level': level, 'move': move, 'reason': reason}
     alerts, bot_token, chat_id = read_config('config.json')
-    alerts.append({'stock': stock, 'level': level, 'move': move})
+    alerts.append(alert)
     write_config('config.json', alerts, bot_token, chat_id)
 
 def run_alerts():
@@ -74,9 +86,11 @@ def run_alerts():
         stock = alert['stock']
         level = alert['level']
         move = alert['move']
+        reason = alert['reason']
         price = get_stock_price(stock)
         if (price > level and move == 'above') or (price < level and move == 'below'):
-            send_telegram_message(bot_token, chat_id, f'Stock {stock} is now at {price}')
+            arrow = '↑' if move == 'above' else '↓'
+            send_telegram_message(bot_token, chat_id, f'Stock {stock} is now at {price} ({arrow} {level}). Reason: {reason}')
 
 def delete_all_alerts():
     """
@@ -93,6 +107,15 @@ def print_all_alerts():
     for alert in alerts:
         print(f"Stock: {alert['stock']}, Level: {alert['level']}, Move: {alert['move']}")
 
+def delete_alerts_for_stock():
+    """
+    Deletes all alerts for a specific stock from the configuration file.
+    """
+    stock = input('Enter the stock symbol: ')
+    alerts, bot_token, chat_id = read_config('config.json')
+    alerts = [alert for alert in alerts if alert['stock'] != stock]
+    write_config('config.json', alerts, bot_token, chat_id)
+
 def main():
     """
     The main function that displays the menu and handles user input.
@@ -101,23 +124,24 @@ def main():
         print('1. Add alert')
         print('2. Run alerts')
         print('3. Delete all alerts')
-        print('4. Print all alerts')
-        print('5. Exit')
+        print('4. Delete alerts for a stock')
+        print('5. Print all alerts')
+        print('6. Exit')
         choice = input('Enter your choice: ')
         if choice == '1':
             add_alert()
         elif choice == '2':
-            try:
-                while True:
-                    run_alerts()
-            except KeyboardInterrupt:
-                pass
+            run_alerts()
         elif choice == '3':
             delete_all_alerts()
         elif choice == '4':
-            print_all_alerts()
+            delete_alerts_for_stock()
         elif choice == '5':
+            print_all_alerts()
+        elif choice == '6':
             break
+        else:
+            print("Invalid choice. Please enter a number between 1 and 6.")
 
 if __name__ == "__main__":
     main()

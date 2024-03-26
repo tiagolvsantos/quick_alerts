@@ -8,3 +8,7 @@ https://www.directual.com/lesson-library/how-to-create-a-telegram-bot
  - Copy the config_template.json and rename it to config.json
  - Replace YOUR_BOT_TOKEN and YOUR_CHAT_ID with your telegram info
  - Run the python code.
+
+
+# Support
+This only supports tickers from Yahoo Finance
