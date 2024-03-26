@@ -61,7 +61,7 @@ def add_alert():
     """
     Adds a new alert to the configuration file.
     """
-    stock = input('Enter the stock symbol: ')
+    stock = input('Enter the stock symbol: ').upper()
     if get_stock_price(stock) is None:
         print(f"Stock {stock} does not exist.")
         return
@@ -94,10 +94,14 @@ def run_alerts():
 
 def delete_all_alerts():
     """
-    Deletes all alerts from the configuration file.
+    Deletes all alerts from the configuration file after confirmation.
     """
-    _, bot_token, chat_id = read_config('config.json')
-    write_config('config.json', [], bot_token, chat_id)
+    confirmation = input('Are you sure you want to delete all alerts? (yes/no): ').lower()
+    if confirmation == 'yes':
+        _, bot_token, chat_id = read_config('config.json')
+        write_config('config.json', [], bot_token, chat_id)
+    else:
+        print("Operation cancelled.")
 
 def print_all_alerts():
     """
