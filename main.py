@@ -3,6 +3,9 @@ import requests
 import yfinance as yf
 import pandas as pd
 import time
+from datetime import datetime
+from finvizfinance.quote import finvizfinance
+
 
 def read_config(file_path):
     with open(file_path, 'r') as file:
@@ -38,7 +41,7 @@ def add_alert_interactive():
     if _get_stock_price(stock) is None:
         print(f"Stock {stock} does not exist.")
         return
-    level = float(input('Enter the price level: '))
+    level = next((float(level_input) for level_input in iter(lambda: input('Enter the price level: '), 'q') if level_input.replace('.','',1).isdigit()), 'q')
     move = ''
     while move not in ['above', 'below']:
         move = input('Enter the move (above/below): ').lower()
@@ -96,7 +99,7 @@ def run_alerts():
         if '50-day moving average' in alert['reason']:
             if (price > level * 1.01 and move == 'above') or (price < level * 0.99 and move == 'below'):
                 arrow = '↑' if move == 'above' else '↓'
-                send_telegram_message(bot_token, chat_id, f'Stock ${stock} is now at {price} ({arrow} {level}). Reason: {reason}')
+                send_telegram_message(bot_token, chat_id, f'Stock ${stock} is now at {price} ({arrow} {level} 50DMA). Reason: {reason}')
             else:
                 new_alerts.append(alert)
         else:
@@ -142,8 +145,8 @@ def create_alerts_for_new_all_time_highs():
     """
     Creates an alert for each stock in the S&P 500 when it reaches a new all-time high.
     """
-    sp500_stocks = _get_stocks()
-    for stock in sp500_stocks:
+    list_stocks = _get_stocks()
+    for stock in list_stocks:
         all_time_high = _get_all_time_high(stock)
         add_alert(stock, all_time_high, 'above', 'New all-time high')
 
@@ -151,8 +154,8 @@ def create_alerts_for_new_all_time_highs():
     """
     Creates an alert for each stock in the S&P 500 when it reaches a new all-time high.
     """
-    sp500_stocks = _get_stocks()
-    for stock in sp500_stocks:
+    list_stocks = _get_stocks()
+    for stock in list_stocks:
         all_time_high = round(_get_all_time_high(stock),2)
         add_alert(stock, all_time_high, 'above', 'New all-time high')  
 
@@ -160,17 +163,17 @@ def create_alerts_for_new_all_time_lows():
     """
     Creates an alert for each stock in the S&P 500 when it reaches a new all-time low.
     """
-    sp500_stocks = _get_stocks()
-    for stock in sp500_stocks:
+    list_stocks = _get_stocks()
+    for stock in list_stocks:
         all_time_low = round(_get_all_time_low(stock), 2)
-        add_alert(stock, all_time_low, 'below', 'New all-time low')    
+        add_alert(stock, all_time_low, 'below', 'New 52 week low')    
 
 def create_alerts_for_new_all_time_lows():
     """
     Creates an alert for each stock in the S&P 500 when it reaches a new all-time low.
     """
-    sp500_stocks = _get_stocks()
-    for stock in sp500_stocks:
+    list_stocks = _get_stocks()
+    for stock in list_stocks:
         all_time_low = round(_get_all_time_low(stock), 2)
         add_alert(stock, all_time_low, 'below', 'New all-time low')    
 
@@ -184,12 +187,33 @@ def create_moving_average_alerts():
     Returns:
     None
     """
-    sp500_stocks = _get_stocks()
-    for stock in sp500_stocks:   
+    list_stocks = _get_stocks()
+    for stock in list_stocks:   
         data = yf.download(stock, period="50d",progress=False)
         moving_average = round(data['Close'].mean(),2)
         add_alert(stock, moving_average, 'above', f"The current price of {stock} is above its 50-day moving average.")
         add_alert(stock, moving_average, 'below', f"The current price of {stock} is below its 50-day moving average.")
+
+def get_insider_info():
+    """
+    Returns the insider trading information for a stock.
+    """
+    list_stocks = _get_stocks()
+    for stock in list_stocks:
+        try:
+            insider_trading_data = pd.DataFrame(_get_stock_insider_trading(stock))
+            for index, row in insider_trading_data.iterrows():
+                if ' '.join(row['SEC Form 4'].split()[0:2]) == datetime.now().strftime("%b %d"):
+                    print(f"Insider trading information for {stock}: {row}")
+        except Exception as e:
+            print(f"An error occurred with stock {stock}: {e}")
+            continue
+
+def _get_stock_insider_trading(symbol:str):
+    if symbol:
+        stock = finvizfinance(symbol)
+        return stock.ticker_inside_trader()
+    return pd.DataFrame()
 
 def _get_stock_price(stock):
     """
@@ -212,7 +236,7 @@ def _get_all_time_high(stock):
     Returns the all-time high price for a stock.
     """
     data = yf.Ticker(stock)
-    history = data.history(period="max")
+    history = data.history(period="1y")
     return history['High'].max()
 
 def _get_all_time_low(stock):
@@ -220,12 +244,15 @@ def _get_all_time_low(stock):
     Returns the all-time low price for a stock.
     """
     data = yf.Ticker(stock)
-    history = data.history(period="max")
+    history = data.history(period="1y")
     return history['Low'].min()
 
 def _get_stocks():
     """
-    Returns a list of all S&P 500 stocks.
+    Returns a list of stocks.
+
+    Returns:
+        list: A list of stocks.
     """
     stocks = ['AAPL', 'MSFT', 'AMZN', 'GOOG', 'BRK-B', 'V', 'JNJ', 'WMT', 'JPM',
           'ASML','COST','MA','HD','MCD','LLY','NFLX','ACN','ADBE','AMGN','AVGO',
@@ -250,7 +277,7 @@ def _get_stocks():
           'MC.PA','CDI.PA','KER.PA','RMS.PA','EL.PA','ADYEN.AS','ASML.AS','HEIA.AS',
           'MUV2.DE','SAP.DE','CAP.PA','AF.PA','BNP.PA','ACA.PA','CS.PA','BN.PA','GLE.PA',
           'ES=F','CL=F','NG=F','GC=F','SI=F','HG=F','NQ=F','RTY=F','BTC-USD',
-          'ETH-USD','ADA-USD','BNB-USD','SOL1-USD','XRP-USD','DOGE-USD','LTC-USD']
+          'ETH-USD','ADA-USD','BNB-USD','SOL-USD','XRP-USD','DOGE-USD','LTC-USD']
     
     return list(set(stocks))
 
