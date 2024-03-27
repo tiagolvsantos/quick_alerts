@@ -1,6 +1,7 @@
 import json
 import requests
 import yfinance as yf
+import time
 
 def read_config(file_path):
     with open(file_path, 'r') as file:
@@ -123,7 +124,12 @@ def main():
         if choice == '1':
             add_alert()
         elif choice == '2':
-            run_alerts()
+            try:
+                while True:
+                    run_alerts()
+                    time.sleep(30)  # Wait for 60 seconds before running the alerts again
+            except KeyboardInterrupt:
+                print("Stopping alerts run...")
         elif choice == '3':
             delete_all_alerts()
         elif choice == '4':
