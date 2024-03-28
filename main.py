@@ -37,17 +37,12 @@ def add_alert_interactive():
     """
     Adds a new alert to the configuration file.
     """
-    stock = input('Enter the stock symbol: ').upper()
-    if _get_stock_price(stock) is None:
-        print(f"Stock {stock} does not exist.")
-        return
+    stock = input('Enter the stock symbol: ').upper(); print(f"Stock {stock} does not exist.") if _get_stock_price(stock) is None else None
     level = next((float(level_input) for level_input in iter(lambda: input('Enter the price level: '), 'q') if level_input.replace('.','',1).isdigit()), 'q')
     move = ''
-    while move not in ['above', 'below']:
-        move = input('Enter the move (above/below): ').lower()
-        if move not in ['above', 'below']:
-            print("Invalid move. Please enter 'above' or 'below'.")
+    while (move := input('Enter the move (above/below): ').lower()) not in ['above', 'below']: print("Invalid move. Please enter 'above' or 'below'.")
     reason = input('Enter the reason for the alert: ').lower()
+    
     alert = {'stock': stock, 'level': level, 'move': move, 'reason': reason, 'alert_type': 'manual'}
     alerts = read_alerts('alerts.json')
     alerts.append(alert)
@@ -82,6 +77,7 @@ def run_alerts():
     """
     bot_token, chat_id = read_config('config.json')
     alerts = read_alerts('alerts.json')
+
     new_alerts = []
     for alert in alerts:
         stock = alert['stock']
@@ -95,17 +91,18 @@ def run_alerts():
         else:
             print(f"Could not get the price for stock {stock}. Skipping this stock.")
             continue
-
+        finviz = f"https://finviz.com/{'crypto_charts' if '-USD' in stock else 'quote'}.ashx?t={stock.replace('-USD', 'USD')}&p=d"
+        
         if '50-day moving average' in alert['reason']:
             if (price > level * 1.01 and move == 'above') or (price < level * 0.99 and move == 'below'):
                 arrow = '↑' if move == 'above' else '↓'
-                send_telegram_message(bot_token, chat_id, f'Stock ${stock} is now at {price} ({arrow} {level} 50DMA). Reason: {reason}')
+                send_telegram_message(bot_token, chat_id, f'Stock ${stock} is now at {price} ({arrow} {level} 50DMA). Reason: {reason} | {finviz}')
             else:
                 new_alerts.append(alert)
         else:
             if (price > level and move == 'above') or (price < level and move == 'below'):
                 arrow = '↑' if move == 'above' else '↓'
-                send_telegram_message(bot_token, chat_id, f'Stock ${stock} is now at {price} ({arrow} {level}). Reason: {reason}')
+                send_telegram_message(bot_token, chat_id, f'Stock ${stock} is now at {price} ({arrow} {level}). Reason: {reason} | {finviz}')
             else:
                 new_alerts.append(alert)
     write_alerts('alerts.json', new_alerts)
