@@ -3,6 +3,7 @@ import requests
 import yfinance as yf
 import pandas as pd
 import time
+import argparse
 from datetime import datetime
 from finvizfinance.quote import finvizfinance
 
@@ -274,27 +275,30 @@ def _get_stocks():
           'MC.PA','CDI.PA','KER.PA','RMS.PA','EL.PA','ADYEN.AS','ASML.AS','HEIA.AS',
           'MUV2.DE','SAP.DE','CAP.PA','AF.PA','BNP.PA','ACA.PA','CS.PA','BN.PA','GLE.PA',
           'ES=F','CL=F','NG=F','GC=F','SI=F','HG=F','NQ=F','RTY=F','BTC-USD',
-          'ETH-USD','ADA-USD','BNB-USD','SOL-USD','XRP-USD','DOGE-USD','LTC-USD']
+          'ETH-USD','ADA-USD','BNB-USD','SOL-USD','XRP-USD','DOGE-USD','LTC-USD','AMAT','INTU','EBAY']
     
     return list(set(stocks))
 
 
-def main():
+def main(choice=None):
     """
     The main function that runs the menu loop.
     """
     while True:
         print_menu()
-        choice = input('Enter your choice: ')
+        if not choice:
+            choice = input('Enter your choice: ')
         if choice == '1':
             add_alert_interactive()
         elif choice == '2':
             try:
                 while True:
+                    print("Running alerts...")
                     run_alerts()
                     time.sleep(600)  # Sleep for 10 minutes
             except KeyboardInterrupt:
                 print("Interrupted by user. Exiting...")
+                main()
         elif choice == '3':
             delete_all_alerts()
         elif choice == '4':
@@ -309,9 +313,10 @@ def main():
             create_moving_average_alerts()
         elif choice == '9':
             print('Exiting...')
-            break
+            exit()
         else:
             print('Invalid choice. Please try again.')
+            choice = None  # Reset choice to prompt user for input in the next iteration
 
 def print_menu():
     """
@@ -327,6 +332,8 @@ def print_menu():
     print('8. Create alerts 50 DMA')
     print('9. Exit')
 if __name__ == "__main__":
-    main()
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--choice", help="Enter your choice")
+    args = parser.parse_args()
+    main(args.choice)
 
