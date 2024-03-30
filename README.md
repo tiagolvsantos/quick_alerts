@@ -15,9 +15,7 @@ This is a stock alert system written in Python. It allows users to set alerts fo
 9. Exit: Exit the application.
 
 ## How to Run
-
-- Copy the config_template.json and rename it to config.json
-- Replace YOUR_BOT_TOKEN and YOUR_CHAT_ID with your telegram info
+- Set telegram_bot_token and telegram_chat_id as environment vars on your system 
 - To run this application, navigate to the directory containing the `main.py` file in your terminal and type `python main.py`.
 
 ## Dependencies

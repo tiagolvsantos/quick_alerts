@@ -46,7 +46,6 @@ def run_alerts():
     Runs all alerts and sends a message if the stock price is above or below the alert level.
     If an alert is triggered, it is deleted.
     """
-    bot_token, chat_id = jf.read_config('config.json')
     alerts = jf.read_alerts('alerts.json')
 
     new_alerts = []
