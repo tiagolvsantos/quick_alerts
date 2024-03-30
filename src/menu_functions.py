@@ -75,13 +75,13 @@ def run_alerts():
         if '50-day moving average' in alert['reason']:
             if (price > level * 1.01 and move == 'above') or (price < level * 0.99 and move == 'below'):
                 arrow = '↑' if move == 'above' else '↓'
-                tg.send_telegram_message(bot_token, chat_id, f'${symbol} is now at {price} ({arrow} {level} 50DMA). Reason: {reason} | {finviz}')
+                tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level} 50DMA). Reason: {reason} | {finviz}')
             else:
                 new_alerts.append(alert)
         else:
             if (price > level and move == 'above') or (price < level and move == 'below'):
                 arrow = '↑' if move == 'above' else '↓'
-                tg.send_telegram_message(bot_token, chat_id, f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {finviz}')
+                tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {finviz}')
             else:
                 new_alerts.append(alert)
     jf.write_alerts('alerts.json', new_alerts)
