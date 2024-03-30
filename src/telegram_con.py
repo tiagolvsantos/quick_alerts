@@ -6,8 +6,6 @@ def send_telegram_message(message):
     Sends a message to a Telegram chat using the provided bot token and chat ID.
 
     Args:
-        bot_token (str): The Telegram bot token.
-        chat_id (str): The Telegram chat ID.
         message (str): The message to send.
     """
     bot_token = os.getenv('telegram_bot_token')
