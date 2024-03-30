@@ -1,323 +1,58 @@
-import json
-import requests
-import yfinance as yf
 import pandas as pd
 import time
 import argparse
-from datetime import datetime
-from finvizfinance.quote import finvizfinance
-
-
-def read_config(file_path):
-    with open(file_path, 'r') as file:
-        config = json.load(file)
-    return config['telegram_bot_token'], config['telegram_chat_id']
-
-def read_alerts(file_path):
-    with open(file_path, 'r') as file:
-        alerts = json.load(file)
-    return alerts
-
-def write_alerts(file_path, alerts):
-    with open(file_path, 'w') as file:
-        json.dump(alerts, file)
-
-def send_telegram_message(bot_token, chat_id, message):
-    """
-    Sends a message to a Telegram chat using the provided bot token and chat ID.
-
-    Args:
-        bot_token (str): The Telegram bot token.
-        chat_id (str): The Telegram chat ID.
-        message (str): The message to send.
-    """
-    url = f"https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={chat_id}&text={message}"
-    requests.get(url)
-
-def add_alert_interactive():
-    """
-    Adds a new alert to the configuration file.
-    """
-    stock = input('Enter the stock symbol: ').upper(); print(f"Stock {stock} does not exist.") if _get_stock_price(stock) is None else None
-    level = next((float(level_input) for level_input in iter(lambda: input('Enter the price level: '), 'q') if level_input.replace('.','',1).isdigit()), 'q')
-    move = ''
-    while (move := input('Enter the move (above/below): ').lower()) not in ['above', 'below']: print("Invalid move. Please enter 'above' or 'below'.")
-    reason = input('Enter the reason for the alert: ').lower()
-    
-    alert = {'stock': stock, 'level': level, 'move': move, 'reason': reason, 'alert_type': 'manual'}
-    alerts = read_alerts('alerts.json')
-    alerts.append(alert)
-    write_alerts('alerts.json', alerts)
-
-def add_alert(stock, level, move, reason):
-    """
-    Adds a new alert.
-
-    Parameters:
-    stock (str): The stock symbol.
-    level (float): The price level.
-    move (str): The direction of the price movement ('above' or 'below').
-    reason (str): The reason for the alert.
-    """
-    alert = {
-        'stock': stock,
-        'level': level,
-        'move': move,
-        'reason': reason,
-        'alert_type': "automatic"
-    }
-    alerts = read_alerts('alerts.json')
-    alerts.append(alert)
-    write_alerts('alerts.json', alerts)
-    print(f"Alert added for stock {stock} when it moves {move} {level}. Reason: {reason}")
-
-def run_alerts():
-    """
-    Runs all alerts and sends a message if the stock price is above or below the alert level.
-    If an alert is triggered, it is deleted.
-    """
-    bot_token, chat_id = read_config('config.json')
-    alerts = read_alerts('alerts.json')
-
-    new_alerts = []
-    for alert in alerts:
-        stock = alert['stock']
-        level = alert['level']
-        move = alert['move']
-        reason = alert['reason']
-        price = _get_stock_price(stock)
-
-        if price is not None:
-            price = round(price, 2)
-        else:
-            print(f"Could not get the price for stock {stock}. Skipping this stock.")
-            continue
-        finviz = f"https://finviz.com/{'crypto_charts' if '-USD' in stock else 'quote'}.ashx?t={stock.replace('-USD', 'USD')}&p=d"
-        
-        if '50-day moving average' in alert['reason']:
-            if (price > level * 1.01 and move == 'above') or (price < level * 0.99 and move == 'below'):
-                arrow = '↑' if move == 'above' else '↓'
-                send_telegram_message(bot_token, chat_id, f'Stock ${stock} is now at {price} ({arrow} {level} 50DMA). Reason: {reason} | {finviz}')
-            else:
-                new_alerts.append(alert)
-        else:
-            if (price > level and move == 'above') or (price < level and move == 'below'):
-                arrow = '↑' if move == 'above' else '↓'
-                send_telegram_message(bot_token, chat_id, f'Stock ${stock} is now at {price} ({arrow} {level}). Reason: {reason} | {finviz}')
-            else:
-                new_alerts.append(alert)
-    write_alerts('alerts.json', new_alerts)
-
-def delete_all_alerts():
-    """
-    Deletes all alerts of a specific type from the configuration file after confirmation.
-    """
-    alert_type = input('Enter the alert type to delete: (automatic/manual)').lower()
-    confirmation = input(f'Are you sure you want to delete all alerts of type {alert_type}? (yes/no): ').lower()
-    if confirmation == 'yes':
-        alerts = read_alerts('alerts.json')
-        alerts = [alert for alert in alerts if alert['alert_type'] != alert_type]
-        write_alerts('alerts.json', alerts)
-    else:
-        print("Operation cancelled.")
-
-def print_all_alerts():
-    """
-    Prints all alerts from the configuration file.
-    """
-    alerts = read_alerts('alerts.json')
-    for alert in alerts:
-        if alert['alert_type'] == 'manual':
-            print(f"Stock: {alert['stock']}, Level: {alert['level']}, Move: {alert['move']}, Reason: {alert['reason']}")
-
-def delete_alerts_for_stock():
-    """
-    Deletes all alerts for a specific stock from the configuration file.
-    """
-    stock = input('Enter the stock symbol: ').upper()
-    alerts = read_alerts('alerts.json')
-    alerts = [alert for alert in alerts if alert['stock'] != stock]
-    write_alerts('alerts.json', alerts)
-
-def create_alerts_for_new_all_time_highs():
-    """
-    Creates an alert for each stock in the S&P 500 when it reaches a new all-time high.
-    """
-    list_stocks = _get_stocks()
-    for stock in list_stocks:
-        all_time_high = _get_all_time_high(stock)
-        add_alert(stock, all_time_high, 'above', 'New all-time high')
-
-def create_alerts_for_new_all_time_highs():
-    """
-    Creates an alert for each stock in the S&P 500 when it reaches a new all-time high.
-    """
-    list_stocks = _get_stocks()
-    for stock in list_stocks:
-        all_time_high = round(_get_all_time_high(stock),2)
-        add_alert(stock, all_time_high, 'above', 'New all-time high')  
-
-def create_alerts_for_new_all_time_lows():
-    """
-    Creates an alert for each stock in the S&P 500 when it reaches a new all-time low.
-    """
-    list_stocks = _get_stocks()
-    for stock in list_stocks:
-        all_time_low = round(_get_all_time_low(stock), 2)
-        add_alert(stock, all_time_low, 'below', 'New 52 week low')    
-
-def create_alerts_for_new_all_time_lows():
-    """
-    Creates an alert for each stock in the S&P 500 when it reaches a new all-time low.
-    """
-    list_stocks = _get_stocks()
-    for stock in list_stocks:
-        all_time_low = round(_get_all_time_low(stock), 2)
-        add_alert(stock, all_time_low, 'below', 'New all-time low')    
-
-def create_moving_average_alerts():
-    """
-    Adds an alert if the stock's current price is above or below its 50-day moving average.
-
-    Parameters:
-    stock (str): The stock symbol.
-
-    Returns:
-    None
-    """
-    list_stocks = _get_stocks()
-    for stock in list_stocks:   
-        data = yf.download(stock, period="50d",progress=False)
-        moving_average = round(data['Close'].mean(),2)
-        add_alert(stock, moving_average, 'above', f"The current price of {stock} is above its 50-day moving average.")
-        add_alert(stock, moving_average, 'below', f"The current price of {stock} is below its 50-day moving average.")
-
-def get_insider_info():
-    """
-    Returns the insider trading information for a stock.
-    """
-    list_stocks = _get_stocks()
-    for stock in list_stocks:
-        try:
-            insider_trading_data = pd.DataFrame(_get_stock_insider_trading(stock))
-            for index, row in insider_trading_data.iterrows():
-                if ' '.join(row['SEC Form 4'].split()[0:2]) == datetime.now().strftime("%b %d"):
-                    print(f"Insider trading information for {stock}: {row}")
-        except Exception as e:
-            print(f"An error occurred with stock {stock}: {e}")
-            continue
-
-def _get_stock_insider_trading(symbol:str):
-    if symbol:
-        stock = finvizfinance(symbol)
-        return stock.ticker_inside_trader()
-    return pd.DataFrame()
-
-def _get_stock_price(stock):
-    """
-    Retrieves the last price of a stock using its symbol.
-
-    Args:
-        stock (str): The stock symbol.
-
-    Returns:
-        float: The last price of the stock.
-    """
-    ticker = yf.Ticker(stock)
-    try:
-        return ticker.fast_info['lastPrice']
-    except KeyError:
-        return None
-
-def _get_all_time_high(stock):
-    """
-    Returns the all-time high price for a stock.
-    """
-    data = yf.Ticker(stock)
-    history = data.history(period="1y")
-    return history['High'].max()
-
-def _get_all_time_low(stock):
-    """
-    Returns the all-time low price for a stock.
-    """
-    data = yf.Ticker(stock)
-    history = data.history(period="1y")
-    return history['Low'].min()
-
-def _get_stocks():
-    """
-    Returns a list of stocks.
-
-    Returns:
-        list: A list of stocks.
-    """
-    stocks = ['AAPL', 'MSFT', 'AMZN', 'GOOG', 'BRK-B', 'V', 'JNJ', 'WMT', 'JPM',
-          'ASML','COST','MA','HD','MCD','LLY','NFLX','ACN','ADBE','AMGN','AVGO',
-          'BAC','PEP','CRM','KO','CSCO','CVX','XOM','TSLA','DIS','NVDA','PYPL',
-          'META','TSM','INTC','QCOM','TMUS','ABT','NKE','ORCL','UNH','ABBV',
-          'LMT','RTX','TXN','IBM','NOW','AMD','NEE','DHR','HON','UPS','SBUX',
-          'GS','MRK','CAT','MDT','BLK','CHTR','FIS','PLD','AMT','TMO','BMY',
-          'NET','PLTR','ZM','SNOW','DOCU','ROKU','SQ','CRWD','SHOP','DDOG',
-          'DKNG','PFE','CVS','GM','F','GE','WFC','C','BABA','JD','TGT','LOW',
-          'GM', 'BKNG','UBER','LYFT','Z','EBAY','ETSY','ROKU','SNAP','PINS',
-          'CMG','COIN','ARM','NKE','HUT','TSLA','NIO','FSLY','ZM','MATW','HI',
-          'CSV','SCI','ANF','EL','STZ','BF-B','DEO','BUD','ABEV','MO','PM','LVS',
-          'MGM','WYNN','RCL','CCL','NCLH','MAR','HLT','EXPE','BKNG','TRIP','LYV',
-          'YUM','MKC','DNUT','GIS','HSY','KR','SHAK','TSN','HRL','DPZ','QSR','WEN',
-          'AKAM','ZS','CRWD','NET','PANW','FTNT','CHKP','SPLK','DOCU',
-          'BAC','CVS','WBA','COST','TGT','KR','WMT','DG','DLTR','COST','TJX','ROST',
-          'HD','LOW','BBY','TSCO','ORLY','AZO','AAP','ULTA','LULU','RH','TJX',
-          'CRWD','CROX','EXPE','ZIM','EURN','FRO','GNK','GOGL','NAT','NMM','SBLK',
-          'STNG','FDX','UPS','FTNT','GFS','O','OXY','CVX','XOM','COP','PSX','VLO',
-          'OLN','SWBI','MARA','RIOT','MSTR','HUT','HOOD','SEB','PLUG','TLRY','CGC',
-          'AIR.PA','SAF.PA','RHM.DE','LDO.MI','ENGI.PA','ORA.PA','VIE.PA','SU.PA',
-          'MC.PA','CDI.PA','KER.PA','RMS.PA','EL.PA','ADYEN.AS','ASML.AS','HEIA.AS',
-          'MUV2.DE','SAP.DE','CAP.PA','AF.PA','BNP.PA','ACA.PA','CS.PA','BN.PA','GLE.PA',
-          'ES=F','CL=F','NG=F','GC=F','SI=F','HG=F','NQ=F','RTY=F','BTC-USD',
-          'ETH-USD','ADA-USD','BNB-USD','SOL-USD','XRP-USD','DOGE-USD','LTC-USD','AMAT','INTU','EBAY']
-    
-    return list(set(stocks))
+from src import menu_functions as mf
 
 
 def main(choice=None):
     """
     The main function that runs the menu loop.
+
+    Parameters:
+    - choice (str): The user's choice for the menu option. Defaults to None.
+
+    Returns:
+    - None
+
+    This function displays a menu and executes the corresponding function based on the user's choice.
+    It keeps running in a loop until the user chooses to exit the program.
     """
+    menu_options = {
+        '1': mf.add_alert_interactive,
+        '2': run_alerts,
+        '3': mf.delete_all_alerts,
+        '4': mf.delete_alerts_for_stock,
+        '5': mf.print_all_alerts,
+        '6': mf.create_alerts_for_new_all_time_highs,
+        '7': mf.create_alerts_for_new_all_time_lows,
+        '8': mf.create_moving_average_alerts,
+        '9': exit_program,
+    }
+
     while True:
         print_menu()
         if not choice:
             choice = input('Enter your choice: ')
-        if choice == '1':
-            add_alert_interactive()
-        elif choice == '2':
-            try:
-                while True:
-                    print("Running alerts...")
-                    run_alerts()
-                    time.sleep(600)  # Sleep for 10 minutes
-            except KeyboardInterrupt:
-                print("Interrupted by user. Exiting...")
-                main()
-        elif choice == '3':
-            delete_all_alerts()
-        elif choice == '4':
-            delete_alerts_for_stock()
-        elif choice == '5':
-            print_all_alerts()
-        elif choice == '6':
-            create_alerts_for_new_all_time_highs()
-        elif choice == '7':
-            create_alerts_for_new_all_time_lows()
-        elif choice == '8':
-            create_moving_average_alerts()
-        elif choice == '9':
-            print('Exiting...')
-            exit()
+        func = menu_options.get(choice)
+        if func:
+            func()
+            choice = None  # Reset choice after executing the function
         else:
             print('Invalid choice. Please try again.')
             choice = None  # Reset choice to prompt user for input in the next iteration
 
+def run_alerts():
+    try:
+        while True:
+            print("Running alerts...")
+            mf.run_alerts()
+            time.sleep(600)  # Sleep for 10 minutes
+    except KeyboardInterrupt:
+        print("Interrupted by user. Returning to main menu...")
+
+def exit_program():
+    print('Exiting...')
+    exit()
 def print_menu():
     """
     Prints the menu.
@@ -331,6 +66,8 @@ def print_menu():
     print('7. Create alerts for new all-time lows')
     print('8. Create alerts 50 DMA')
     print('9. Exit')
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--choice", help="Enter your choice")
