@@ -95,7 +95,7 @@ def get_crypto_historical_data(symbol: str, interval="1d"):
         df_quote.columns = ['open time', 'open', 'high', 'low', 'close', 'volume', 'close time', 'asset volume', 'number of trades', 'taker buy asset volume', 'taker buy quote volume', 'ignore']
         df_quote['open time'] = df_quote['open time'].astype(str)
         df_quote['close time'] = df_quote['close time'].astype(str)
-        df_quote['close'] = df_quote['close'].astype(float)
+        df_quote['close'] = float(df_quote['close'].iloc[-1])
         for index, row in df_quote.iterrows():
             df_quote.at[index,'open time']= str(utils.epoch_to_datetime(int(row['open time'])))
             df_quote.at[index,'close time']= str(utils.epoch_to_datetime(int(row['close time'])))
@@ -120,7 +120,7 @@ def get_crypto_last_price(symbol: str, interval="1d"):
         df_quote = pd.DataFrame(requests.get(url).json())
         df_quote.columns = ['open time', 'open', 'high', 'low', 'close', 'volume', 'close time', 'asset volume', 'number of trades', 'taker buy asset volume', 'taker buy quote volume', 'ignore']
 
-        return float(df_quote["close"].tail(1)) if len(df_quote)>0 else 0
+        return float(df_quote['close'].iloc[-1]) if len(df_quote)>0 else 0
     except Exception as e:
         raise e
 

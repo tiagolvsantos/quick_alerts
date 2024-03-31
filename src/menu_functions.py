@@ -6,7 +6,7 @@ def add_alert_interactive():
     """
     Adds a new alert to the configuration file.
     """
-    symbol = input('Enter the symbol: ').upper(); print(f"{symbol} does not exist.") if qd.get_stock_last_price(symbol) is None else None
+    symbol = input('Enter the symbol: ').upper(); print(f"{symbol} does not exist.") if 'USDT' not in symbol and qd.get_stock_last_price(symbol) is None else None
     level = next((float(level_input) for level_input in iter(lambda: input('Enter the price level: '), 'q') if level_input.replace('.','',1).isdigit()), 'q')
     move = ''
     while (move := input('Enter the move (above/below): ').lower()) not in ['above', 'below']: print("Invalid move. Please enter 'above' or 'below'.")
