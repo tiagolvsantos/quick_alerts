@@ -1,0 +1,23 @@
+---
+market: tradfi
+symbols:
+  - ES=F # S&P 500 E-Mini Futures
+  - CL=F # Crude Oil Futures
+  - NG=F # Natural Gas Futures
+  - GC=F # Gold Futures
+  - SI=F # Silver Futures
+  - HG=F # Copper Futures
+  - NQ=F # Nasdaq 100 E-Mini Futures
+  - RTY=F # Russell 2000 E-Mini Futures
+  - YM=F # Dow Jones E-Mini Futures
+  - ZB=F # 30-Year Treasury Bond Futures
+  - ZN=F # 10-Year Treasury Note Futures
+  - ZT=F # 2-Year Treasury Note Futures
+  - ZF=F # 5-Year Treasury Note Futures
+  - ZM=F # Soybean Meal Futures
+  - ZS=F # Soybean Futures
+  - ZC=F # Corn Futures
+  - ZW=F # Wheat Futures
+  - ZL=F # Soybean Oil Futures
+  - ZO=F # Oat Futures
+  - ZR=F # Rough Rice Futures

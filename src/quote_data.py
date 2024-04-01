@@ -95,7 +95,7 @@ def get_crypto_historical_data(symbol: str, interval="1d"):
         df_quote.columns = ['open time', 'open', 'high', 'low', 'close', 'volume', 'close time', 'asset volume', 'number of trades', 'taker buy asset volume', 'taker buy quote volume', 'ignore']
         df_quote['open time'] = df_quote['open time'].astype(str)
         df_quote['close time'] = df_quote['close time'].astype(str)
-        df_quote['close'] = float(df_quote['close'].iloc[-1])
+        df_quote['close'] = pd.to_numeric(df_quote['close'], errors='coerce')
         for index, row in df_quote.iterrows():
             df_quote.at[index,'open time']= str(utils.epoch_to_datetime(int(row['open time'])))
             df_quote.at[index,'close time']= str(utils.epoch_to_datetime(int(row['close time'])))

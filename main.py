@@ -1,4 +1,3 @@
-import pandas as pd
 import time
 import argparse
 from src import menu_functions as mf

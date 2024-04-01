@@ -1,0 +1,30 @@
+---
+market: tradfi
+symbols:
+  - SPY
+  - QQQ
+  - GLD
+  - SLV
+  - USO
+  - UNG
+  - TLT
+  - IEF
+  - JNK
+  - XLF
+  - XLE
+  - XLB
+  - XLY
+  - XLV
+  - XLC
+  - XLU
+  - XLRE
+  - XLP
+  - XLK
+  - XBI
+  - XME
+  - XOP
+  - XLI
+  - IBB
+  - SMH
+  - SOXX
+  - CIBR

@@ -209,14 +209,7 @@ symbols:
   - CS.PA
   - BN.PA
   - GLE.PA
-  - ES=F
-  - CL=F
-  - NG=F
-  - GC=F
-  - SI=F
-  - HG=F
-  - NQ=F
-  - RTY=F
   - AMAT
   - INTU
   - EBAY
+  - TDG
