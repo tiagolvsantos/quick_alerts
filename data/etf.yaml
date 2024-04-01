@@ -1,30 +1,30 @@
 ---
 market: tradfi
 symbols:
-  - SPY
-  - QQQ
-  - GLD
-  - SLV
-  - USO
-  - UNG
-  - TLT
-  - IEF
-  - JNK
-  - XLF
-  - XLE
-  - XLB
-  - XLY
-  - XLV
-  - XLC
-  - XLU
-  - XLRE
-  - XLP
-  - XLK
-  - XBI
-  - XME
-  - XOP
-  - XLI
-  - IBB
-  - SMH
-  - SOXX
-  - CIBR
+  - SPY # S&P 500 ETF
+  - QQQ # Nasdaq 100 ETF  
+  - GLD # Gold ETF
+  - SLV # Silver ETF 
+  - USO # Oil ETF
+  - UNG # Natural Gas ETF
+  - TLT # 20+ Year Treasury Bond ETF
+  - IEF # 7-10 Year Treasury Bond ETF
+  - JNK # High Yield Corporate Bond ETF
+  - XLF # Financials ETF
+  - XLE # Energy ETF
+  - XLB # Materials ETF
+  - XLY # Consumer Discretionary ETF
+  - XLV # Health Care ETF
+  - XLC # Communication Services ETF
+  - XLU # Utilities ETF
+  - XLRE # Real Estate ETF
+  - XLP # Consumer Staples ETF
+  - XLK # Technology ETF
+  - XBI # Biotech ETF 
+  - XME # Metals & Mining ETF
+  - XOP # Oil & Gas Exploration & Production ETF
+  - XLI # Industrial ETF
+  - IBB # Biotech ETF
+  - SMH # Semiconductor ETF
+  - SOXX # Semiconductor ETF
+  - CIBR # Cybersecurity ETF

@@ -41,10 +41,15 @@ def add_alert(symbol, level, move, reason, market='stock'):
     jf.write_alerts('alerts.json', alerts)
     print(f"Alert added for stock {symbol} when it moves {move} {level}. Reason: {reason}")
 
-def run_alerts():
+def run_alerts(run_alerts_command):
     """
-    Runs all alerts and sends a message if the stock price is above or below the alert level.
-    If an alert is triggered, it is deleted.
+    Runs the alerts based on the specified criteria.
+
+    Args:
+        run_alerts_command (bool): Indicates whether to actually send the alerts or just print them.
+
+    Returns:
+        None
     """
     alerts = jf.read_alerts('alerts.json')
 
@@ -66,7 +71,7 @@ def run_alerts():
             print(f"Could not get the price for stock {symbol}. Skipping this stock.")
             continue
 
-        if market == "tradefi":
+        if market == "tradfi":
             finviz = f"https://finviz.com/{'crypto_charts' if '-USD' in symbol else 'quote'}.ashx?t={symbol.replace('-USD', 'USD')}&p=d"
         else:
             finviz = ""
@@ -74,14 +79,16 @@ def run_alerts():
         if '50-day moving average' in alert['reason']:
             if (price > level * 1.01 and move == 'above') or (price < level * 0.99 and move == 'below'):
                 arrow = '↑' if move == 'above' else '↓'
-                tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level} 50DMA). Reason: {reason} | {finviz}')
+                if run_alerts_command:
+                    tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level} 50DMA). Reason: {reason} | {finviz}')
                 print(f'${symbol} is now at {price} ({arrow} {level} 50DMA). Reason: {reason} | {finviz}')
             else:
                 new_alerts.append(alert)
         else:
             if (price > level and move == 'above') or (price < level and move == 'below'):
                 arrow = '↑' if move == 'above' else '↓'
-                tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {finviz}')
+                if run_alerts_command:
+                    tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {finviz}')
                 print(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {finviz}')
             else:
                 new_alerts.append(alert)
@@ -100,14 +107,15 @@ def delete_all_alerts():
     else:
         print("Operation cancelled.")
 
-def print_all_alerts():
+def print_symbol_alert():
     """
     Prints all alerts from the configuration file.
     """
+    symbol = input('Enter the symbol: ').upper(); print(f"{symbol} does not exist.") if 'USDT' not in symbol and qd.get_stock_last_price(symbol) is None else None
     alerts = jf.read_alerts('alerts.json')
     for alert in alerts:
-        if alert['alert_type'] == 'manual':
-            print(f"Stock: {alert['stock']}, Level: {alert['level']}, Move: {alert['move']}, Reason: {alert['reason']}")
+        if alert['alert_type'] == 'manual' and alert['symbol'] == symbol:
+            print(f"${alert['symbol']}, Level: {alert['level']}, Move: {alert['move']}, Reason: {alert['reason']}")
 
 def delete_alerts_for_stock():
     """
@@ -123,13 +131,14 @@ def create_alerts_for_new_all_time_highs():
     Creates alerts for new all-time highs for symbols in the market.
     """
     list_symbols = qd.get_all_symbols()
-    for symbol in list_symbols:
-        market = symbol[1]
-        if symbol[1] == 'tradfi':
-            all_time_high = round(qd.get_all_time_high(symbol[0]), 2)
+    for record in list_symbols:
+        market = record[1]
+        symbol = record[0]
+        if market == 'tradfi':
+            all_time_high = round(qd.get_all_time_high(symbol), 2)
         else:
-            all_time_high = round(qd.get_crypto_historical_data(symbol[0])['close'].max(),2)
-        add_alert(symbol[0], all_time_high, 'above', 'New all-time high', market)
+            all_time_high = round(qd.get_crypto_historical_data(symbol)['close'].max(),2)
+        add_alert(symbol, all_time_high, 'above', 'New all-time high', market)
 
 def create_alerts_for_new_all_time_lows():
     """
@@ -142,31 +151,37 @@ def create_alerts_for_new_all_time_lows():
     Finally, it calls the `add_alert()` function to add an alert for the symbol with the all-time low value.
     """
     list_symbols = qd.get_all_symbols()
-    for symbol in list_symbols:
-        market = symbol[1]
-        if symbol[1] == 'tradfi':
-            all_time_low = round(qd.get_all_time_low(symbol[0]), 2)
+    for record in list_symbols:
+        market = record[1]
+        symbol = record[0]
+        if market == 'tradfi':
+            all_time_low = round(qd.get_all_time_low(symbol), 2)
         else:
-            all_time_low = round(qd.get_crypto_historical_data(symbol[0])['close'].min(),2)
-        add_alert(symbol[0], all_time_low, 'below', 'New 52 week low', market)
+            all_time_low = round(qd.get_crypto_historical_data(symbol)['close'].min(),2)
+        add_alert(symbol, all_time_low, 'below', 'New 52 week low', market)
 
-def create_moving_average_alerts():
+def create_moving_average_alerts(period):
     """
-    Adds an alert if the stock's current price is above or below its 50-day moving average.
+    Creates moving average alerts for a given period.
 
     Parameters:
-    stock (str): The stock symbol.
+    - period (int): The number of days to calculate the moving average.
 
     Returns:
     None
     """
     list_symbols = qd.get_all_symbols()
-    for symbol in list_symbols:
-        market = symbol[1]
-        if symbol[1] == 'tradfi':
-            moving_average = round(qd.get_tradfi_historical_data(symbol[0])['close'].rolling(window=50).mean(), 2).tail(1).values[0]
+    for record in list_symbols:
+        market = record[1]
+        symbol = record[0]
+        if market == 'tradfi':
+            moving_average = round(qd.get_tradfi_historical_data(symbol)['close'].rolling(window=period).mean(), 2).tail(1).values[0]
+            price = round(qd.get_stock_last_price(symbol),2)
         else:
-            moving_average = round(qd.get_crypto_historical_data(symbol[0])['close'].rolling(window=50).mean(),2).tail(1).values[0]
-
-        add_alert(symbol[0], moving_average, 'above', f"The current price of {symbol[0]} is above its 50-day moving average.", market)
-        add_alert(symbol[0], moving_average, 'below', f"The current price of {symbol[0]} is below its 50-day moving average.", market)
+            moving_average = round(qd.get_crypto_historical_data(symbol)['close'].rolling(window=period).mean(),2).tail(1).values[0]
+            price = round(qd.get_crypto_last_price(symbol),2)
+        
+        if price > moving_average:
+            add_alert(symbol, moving_average, 'below', f"The current price of {symbol} is below its {period}-day moving average.", market)
+        else:
+            add_alert(symbol, moving_average, 'above', f"The current price of {symbol} is above its {period}-day moving average.", market)

@@ -21,3 +21,4 @@ symbols:
   - ZL=F # Soybean Oil Futures
   - ZO=F # Oat Futures
   - ZR=F # Rough Rice Futures
+  - DX=F # US Dollar Index Futures
