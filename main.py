@@ -19,13 +19,13 @@ def main(run_alerts_command=False):
     menu_options = {
         '1': mf.add_alert_interactive,
         '2': lambda: run_alerts(args.run_alerts_command),
-        '3': mf.delete_all_alerts,
+        '3': mf.delete_type_alerts,
         '4': mf.delete_alerts_for_stock,
         '5': mf.print_symbol_alert,
-        '6': mf.create_alerts_for_new_highs,
-        '7': mf.create_alerts_for_new_lows,
-        '8': lambda: mf.create_moving_average_alerts(50),
-        '9': mf.create_bollinger_bands_alerts,        
+        '6': lambda: [mf.create_alerts_for_new_highs(), mf.create_alerts_for_new_lows()],
+        '7': lambda: mf.create_moving_average_alerts(50),
+        '8': mf.create_bollinger_bands_alerts,
+        '9': mf.create_rsi_alerts,       
         '10': exit_program,
     }
 
@@ -56,24 +56,28 @@ def run_alerts(run_alerts_command):
 def exit_program():
     print('Exiting...')
     exit()
+
 def print_menu():
     """
     Prints the menu.
     """
     print('1. Add alert')
     print('2. Run alerts')
-    print('3. Delete all alerts')
-    print('4. Delete alerts for a stock')
+    print('3. Delete type alerts')
+    print('4. Delete alerts for a symbol')
     print('5. Print symbol alerts')
-    print('6. Create alerts for new highs')
-    print('7. Create alerts for new lows')
-    print('8. Create alerts 50 DMA')
-    print('9. Create alerts BBbands outside bands')
+    print('6. Create alerts for new highs/lows')
+    print('7. Create alerts 50 DMA')
+    print('8. Create alerts BBbands outside bands')
+    print('9. Create alerts RSI')
     print('10. Exit')
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--run_alerts_command", action='store_true', help="Enter your command")
-    args = parser.parse_args()
-    main(args.run_alerts_command)  
+    try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--run_alerts_command", action='store_true', help="Enter your command")
+        args = parser.parse_args()
+        main(args.run_alerts_command) 
+    except KeyboardInterrupt:
+        print("Interrupted by user. Exiting...")

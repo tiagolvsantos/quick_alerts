@@ -34,7 +34,7 @@ def add_alert_interactive():
     alerts.append(alert)
     jf.write_alerts('alerts.json', alerts)
 
-def add_alert(symbol, level, move, reason, alert_type, market='stock'):
+def add_alert(symbol, level, move, reason, alert_type, market='tradfi'):
     """
     Adds a new alert.
 
@@ -56,7 +56,7 @@ def add_alert(symbol, level, move, reason, alert_type, market='stock'):
     alerts = jf.read_alerts('alerts.json')
     alerts.append(alert)
     jf.write_alerts('alerts.json', alerts)
-    print(f"Alert added for stock {symbol} when it moves {move} {level}. Reason: {reason}")
+    print(f"Alert added for symbol {symbol} when it moves {move} {level}. Reason: {reason}")
 
 def run_alerts(run_alerts_command):
     """
@@ -139,16 +139,46 @@ def run_alerts(run_alerts_command):
     _delete_alerts('automatic')
     jf.write_alerts('alerts.json', new_alerts)
 
-def delete_all_alerts():
+def _get_type():
+    while True:
+        alert_type = input('Enter the alert type to delete: (automatic/manual)').lower()
+        if alert_type in ['automatic', 'manual']:
+            return alert_type
+        else:
+            print("Invalid input. Please enter 'automatic' or 'manual'.")
+
+def _get_alert_type():
+    while True:
+        alert_type = input('Enter the alert type to delete: (rsi/bb/dma/price)').lower()
+        if alert_type in ['rsi', 'bb', 'dma', 'price']:
+            return alert_type
+        else:
+            print("Invalid input. Please enter 'rsi', 'bb', 'dma', or 'price'.")
+
+def _confirm_deletion(type):
+    while True:
+        confirmation = input(f'Are you sure you want to delete all alerts of type {type}? (yes/no): ').lower()
+        if confirmation in ['yes', 'no']:
+            return confirmation
+        else:
+            print("Invalid input. Please enter 'yes' or 'no'.")
+
+def delete_type_alerts():
     """
     Deletes all alerts of a specific type from the configuration file after confirmation.
     """
-    type = input('Enter the alert type to delete: (automatic/manual)').lower()
-    confirmation = input(f'Are you sure you want to delete all alerts of type {type}? (yes/no): ').lower()
+    type = _get_type()
+    alert_type = _get_alert_type()
+    confirmation = _confirm_deletion(type)
+    new_alerts = []
     if confirmation == 'yes':
         alerts = jf.read_alerts('alerts.json')
-        alerts = [alert for alert in alerts if alert['type'] != type]
-        jf.write_alerts('alerts.json', alerts)
+        for alert in alerts:
+            if alert['type'] == type and alert['alert_type'] == alert_type:
+                #print(f"Deleting alert: {alert}")
+                continue
+            new_alerts.append(alert)
+        jf.write_alerts('alerts.json', new_alerts)
     else:
         print("Operation cancelled.")
 
@@ -256,7 +286,6 @@ def create_bollinger_bands_alerts():
             add_alert(symbol, bbdown, 'below', f"The current price of {symbol} is below its BBdown band.", "bb", market)
         if price < bbup:
             add_alert(symbol, bbup, 'above', f"The current price of {symbol} is above its BBup band.", "bb", market)
-
 
 def create_rsi_alerts():
     """
