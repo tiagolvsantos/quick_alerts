@@ -28,3 +28,13 @@ symbols:
   - SMH # Semiconductor ETF
   - SOXX # Semiconductor ETF
   - CIBR # Cybersecurity ETF
+  - GDX  # Gold Miners ETF
+  - GDXJ # Junior Gold Miners ETF
+  - XRT  # Retail ETF
+  - KRE  # Regional Banks ETF
+  - IYR  # Real Estate ETF
+  - IYT  # Transportation ETF
+  - ITB  # Homebuilders ETF
+  - URA  # Uranium ETF
+  - REM  # Mortgage REIT ETF
+  

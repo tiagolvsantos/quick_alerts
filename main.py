@@ -22,10 +22,11 @@ def main(run_alerts_command=False):
         '3': mf.delete_all_alerts,
         '4': mf.delete_alerts_for_stock,
         '5': mf.print_symbol_alert,
-        '6': mf.create_alerts_for_new_all_time_highs,
-        '7': mf.create_alerts_for_new_all_time_lows,
+        '6': mf.create_alerts_for_new_highs,
+        '7': mf.create_alerts_for_new_lows,
         '8': lambda: mf.create_moving_average_alerts(50),
-        '9': exit_program,
+        '9': mf.create_bollinger_bands_alerts,        
+        '10': exit_program,
     }
 
     while True:
@@ -64,10 +65,11 @@ def print_menu():
     print('3. Delete all alerts')
     print('4. Delete alerts for a stock')
     print('5. Print symbol alerts')
-    print('6. Create alerts for new all-time highs')
-    print('7. Create alerts for new all-time lows')
+    print('6. Create alerts for new highs')
+    print('7. Create alerts for new lows')
     print('8. Create alerts 50 DMA')
-    print('9. Exit')
+    print('9. Create alerts BBbands outside bands')
+    print('10. Exit')
 
 
 if __name__ == "__main__":
