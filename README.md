@@ -1,21 +1,23 @@
-# Stock Alert System
+# Financial assets alerts system
 
 This is a stock alert system written in Python. It allows users to set alerts for specific stocks and notifies them when the stock reaches a certain level or hits a new all-time high or low.
 
 ## Features
 
-1. Add alert: Users can add a new alert for a specific stock.
-2. Run alerts: The system checks all alerts and notifies the user if any stock has reached the alert level.
-3. Delete all alerts: Users can delete all alerts.
-4. Delete alerts for a stock: Users can delete all alerts for a specific stock.
-5. Print all alerts: The system prints all alerts to the console.
-6. Create alerts for new all-time highs: The system creates alerts for all S&P 500 stocks when they reach a new all-time high.
-7. Create alerts for new all-time lows: The system creates alerts for all S&P 500 stocks when they reach a new all-time low.
-8. Create alerts 50 DMA crossing
-9. Exit: Exit the application.
+1. **Add alert**: This option allows you to add a new alert.
+2. **Run alerts**: This option runs all the existing alerts.
+3. **Delete type alerts**: This option deletes alerts of a specific type.
+4. **Delete alerts for a symbol**: This option deletes all alerts associated with a specific symbol.
+5. **Print symbol alerts**: This option prints all alerts associated with a specific symbol.
+6. **Create alerts for new highs/lows**: This option creates alerts for new highs or lows.
+7. **Create alerts 50 DMA**: This option creates alerts for 50-day moving averages.
+8. **Create alerts BBbands outside bands**: This option creates alerts for Bollinger Bands outside the bands.
+9. **Create alerts RSI**: This option creates alerts for Relative Strength Index (RSI).
+10. **Exit**: This option allows you to exit the application.
 
 ## How to Run
-- Set telegram_bot_token and telegram_chat_id as environment vars on your system 
+- If you want to run alerts on telegram:
+  - Set telegram_bot_token and telegram_chat_id as environment vars on your system 
 - To run this application, navigate to the directory containing the `main.py` file in your terminal and type `python main.py`.
 
 ### Command-Line Arguments
@@ -48,3 +50,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## Images
+![Alt text](https://github.com/tiagolvsantos/quick_alerts/blob/main/assets/running_alerts.png?raw=true)
