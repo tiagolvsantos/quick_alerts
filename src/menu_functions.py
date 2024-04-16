@@ -2,6 +2,7 @@ from src import json_functions as jf
 from src import quote_data as qd
 from src import telegram_con as tg
 from src import technical_indicators as ti
+import time
 
 def _delete_alerts(type):
     """
@@ -70,12 +71,18 @@ def run_alerts(run_alerts_command):
     """
     alerts = jf.read_alerts('alerts.json')
     new_alerts = []
+    counter = 0
     for alert in alerts:
         symbol = alert['symbol']
         level = alert['level']
         move = alert['move']
         reason = alert['reason']
         market = alert['market']
+
+        counter += 1
+        if counter % 25 == 0:
+            counter = 0
+            time.sleep(5) 
 
         if market == 'tradfi':
             price = qd.get_stock_last_price(symbol)
@@ -210,10 +217,10 @@ def create_alerts_for_new_highs():
         market = record[1]
         symbol = record[0]
         if market == 'tradfi':
-            all_time_high = round(qd.get_all_time_high(symbol), 2)
+            new_high = round(qd.get_all_time_high(symbol), 2)
         elif market == 'crypto':
-            all_time_high = round(qd.get_crypto_historical_data(symbol)['close'].max(),2)
-        add_alert(symbol, all_time_high, 'above', 'New high', "price", market)
+            new_high = round(qd.get_crypto_historical_data(symbol)['close'].max(),2)
+        add_alert(symbol, new_high, 'above', 'New high', "price", market)
 
 def create_alerts_for_new_lows():
     """
@@ -230,10 +237,10 @@ def create_alerts_for_new_lows():
         market = record[1]
         symbol = record[0]
         if market == 'tradfi':
-            all_time_low = round(qd.get_all_time_low(symbol), 2)
+            new_low = round(qd.get_all_time_low(symbol), 2)
         elif market == 'crypto':
-            all_time_low = round(qd.get_crypto_historical_data(symbol)['close'].min(),2)
-        add_alert(symbol, all_time_low, 'below', 'New low', "price", market)
+            new_low = round(qd.get_crypto_historical_data(symbol)['close'].min(),2)
+        add_alert(symbol, new_low, 'below', 'New low', "price", market)
 
 def create_moving_average_alerts(period):
     """

@@ -23,7 +23,7 @@ def main(run_alerts_command=False):
         '4': mf.delete_alerts_for_stock,
         '5': mf.print_symbol_alert,
         '6': lambda: [mf.create_alerts_for_new_highs(), mf.create_alerts_for_new_lows()],
-        '7': lambda: mf.create_moving_average_alerts(50),
+        '7': lambda: [mf.create_moving_average_alerts(50)],
         '8': mf.create_bollinger_bands_alerts,
         '9': mf.create_rsi_alerts,       
         '10': exit_program,

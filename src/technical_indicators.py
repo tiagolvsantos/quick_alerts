@@ -33,7 +33,6 @@ def rsi(df: pd.DataFrame, periods = 14, ema = True):
     rsi = 100 - (100/(1 + rsi))
     return round(rsi.iloc[-1],2)
 
-
 def ichimoku(df):
     high_prices = df['high']
     close_prices = df['close']
