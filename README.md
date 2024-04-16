@@ -2,6 +2,14 @@
 
 This is a stock alert system written in Python. It allows users to set alerts for specific stocks and notifies them when the stock reaches a certain level or hits a new all-time high or low.
 
+## Modules
+
+- `json_functions`: This module contains functions for handling JSON data.
+- `quote_data`: This module contains functions for handling quote data.
+- `telegram_con`: This module contains functions for handling Telegram connections.
+- `technical_indicators`: This module contains functions for calculating technical indicators.
+
+
 ## Features
 
 1. **Add alert**: This option allows you to add a new alert.

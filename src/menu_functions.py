@@ -59,7 +59,7 @@ def add_alert(symbol, level, move, reason, alert_type, market='tradfi'):
     jf.write_alerts('alerts.json', alerts)
     print(f"Alert added for symbol {symbol} when it moves {move} {level}. Reason: {reason}")
 
-def run_alerts(run_alerts_command):
+def run_alerts(run_alerts_command,asset_url_enabled=False):
     """
     Runs the alerts based on the specified criteria.
 
@@ -95,11 +95,11 @@ def run_alerts(run_alerts_command):
             print(f"Could not get the price for stock {symbol}. Skipping this stock.")
             continue
 
-        if market == "tradfi" and "=" not in symbol and "." not in symbol:
+        if market == "tradfi" and "=" not in symbol and "." not in symbol and asset_url_enabled:
             asset_url = f"https://finviz.com/{'crypto_charts' if '-USD' in symbol else 'quote'}.ashx?t={symbol.replace('-USD', 'USD')}&p=d"
-        elif market == "crypto":
+        elif market == "crypto" and asset_url_enabled:
             asset_url = f"https://www.tradingview.com/symbols/{symbol.replace('-USD', 'USD')}/"
-        elif market == "tradfi" and "=" in symbol or "." in symbol:
+        elif market == "tradfi" and "=" in symbol or "." in symbol and asset_url_enabled:
             asset_url = f"https://finance.yahoo.com/quote/{symbol}?.tsrc=fin-srch"
         else:
             asset_url = ""

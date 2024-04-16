@@ -48,7 +48,7 @@ def run_alerts(run_alerts_command):
     try:
         print("Running alerts...")
         while True:
-            mf.run_alerts(run_alerts_command)
+            mf.run_alerts(run_alerts_command, False)
             time.sleep(600)  # Sleep for 10 minutes
     except KeyboardInterrupt:
         print("Interrupted by user. Returning to main menu...")
