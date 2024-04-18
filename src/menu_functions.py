@@ -82,7 +82,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
         counter += 1
         if counter % 25 == 0:
             counter = 0
-            time.sleep(5) 
+            time.sleep(2) 
 
         if market == 'tradfi':
             price = qd.get_stock_last_price(symbol)
@@ -99,7 +99,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
             asset_url = f"https://finviz.com/{'crypto_charts' if '-USD' in symbol else 'quote'}.ashx?t={symbol.replace('-USD', 'USD')}&p=d"
         elif market == "crypto" and asset_url_enabled:
             asset_url = f"https://www.tradingview.com/symbols/{symbol.replace('-USD', 'USD')}/"
-        elif market == "tradfi" and "=" in symbol or "." in symbol and asset_url_enabled:
+        elif (market == "tradfi" and "=" in symbol or "." in symbol) and asset_url_enabled:
             asset_url = f"https://finance.yahoo.com/quote/{symbol}?.tsrc=fin-srch"
         else:
             asset_url = ""
