@@ -3,6 +3,7 @@ from src import quote_data as qd
 from src import telegram_con as tg
 from src import technical_indicators as ti
 import time
+from datetime import datetime
 
 def _delete_alerts(type):
     """
@@ -28,7 +29,7 @@ def add_alert_interactive():
     move = ''
     while (move := input('Enter the move (above/below): ').lower()) not in ['above', 'below']: print("Invalid move. Please enter 'above' or 'below'.")
     reason = input('Enter the reason for the alert: ').lower()
-    market = input('Enter the market for the alert (tradfi/crypto): ').lower()
+    while (market := input('Enter the market for the alert (tradfi/crypto): ').lower()) not in ['tradfi', 'crypto']: print("Invalid move. Please enter 'tradfi' or 'crypto'.")
 
     alert = {'symbol': symbol, 'level': level, 'move': move, 'reason': reason, 'market': market, 'alert_type': 'price', 'type': 'manual'}
     alerts = jf.read_alerts('alerts.json')
@@ -109,7 +110,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                 arrow = '↑' if move == 'above' else '↓'
                 if run_alerts_command:
                     tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
-                print(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
             else:
                 new_alerts.append(alert)
 
@@ -118,7 +119,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                     arrow = '↑' if move == 'above' else '↓'
                     if run_alerts_command:
                         tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
-                    print(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                    print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
                 else:
                     new_alerts.append(alert)
 
@@ -127,7 +128,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                 arrow = '↑' if move == 'above' else '↓'
                 if run_alerts_command:
                     tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
-                print(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
             else:
                 new_alerts.append(alert)
 
@@ -140,7 +141,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                     arrow = '↑' if move == 'above' else '↓'
                     if run_alerts_command:
                         tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
-                    print(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                    print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
             else:
                 new_alerts.append(alert)
     _delete_alerts('automatic')
