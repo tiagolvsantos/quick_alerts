@@ -197,9 +197,17 @@ def print_symbol_alert():
     symbol = input('Enter the symbol: ').upper(); print(f"{symbol} does not exist.") if 'USDT' not in symbol and qd.get_stock_last_price(symbol) is None else None
     alerts = jf.read_alerts('alerts.json')
     for alert in alerts:
-        if alert['alert_type'] == 'manual' and alert['symbol'] == symbol:
+        if alert['type'] == 'manual' and alert['symbol'] == symbol:
             print(f"${alert['symbol']}, Level: {alert['level']}, Move: {alert['move']}, Reason: {alert['reason']}")
 
+def print_manual_alerts():
+    """
+    Prints all manual alerts from the configuration file.
+    """
+    alerts = jf.read_alerts('alerts.json')
+    for alert in alerts:
+        if alert['type'] == 'manual':
+            print(f"${alert['symbol']}, Level: {alert['level']}, Move: {alert['move']}, Reason: {alert['reason']}")
 def delete_alerts_for_stock():
     """
     Deletes all alerts for a specific stock from the configuration file.
