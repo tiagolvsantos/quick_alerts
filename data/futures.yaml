@@ -22,3 +22,13 @@ symbols:
   - ZO=F # Oat Futures
   - ZR=F # Rough Rice Futures
   - DX=F # US Dollar Index Futures
+  - ^GDAXI # DAX Futures
+  - ^FCHI # CAC 40 Futures
+  - ^STOXX50E # Euro Stoxx 50 Futures
+  - ^AEX # AEX Futures  
+  - ^N225  # Nikkei 225 Futures
+  - ^FTSE # FTSE 100 Futures
+  - ^HSI # Hang Seng Index Futures
+
+
+

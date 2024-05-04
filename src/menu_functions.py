@@ -83,7 +83,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
         counter += 1
         if counter % 25 == 0:
             counter = 0
-            time.sleep(2) 
+            time.sleep(5) 
 
         if market == 'tradfi':
             price = qd.get_stock_last_price(symbol)
@@ -308,8 +308,8 @@ def create_rsi_alerts():
     Creates RSI alerts for all symbols.
 
     This function retrieves historical data for each symbol and calculates the RSI (Relative Strength Index).
-    If the RSI is above 70, it adds an alert indicating that the symbol may be overbought.
-    If the RSI is below 30, it adds an alert indicating that the symbol may be oversold.
+    If the RSI is above 85, it adds an alert indicating that the symbol may be overbought.
+    If the RSI is below 25, it adds an alert indicating that the symbol may be oversold.
     The alerts are added using the `add_alert` function.
 
     Parameters:
@@ -327,9 +327,9 @@ def create_rsi_alerts():
         elif market == 'crypto':
             df = qd.get_crypto_historical_data(symbol)
         
-        rsi = ti.rsi(df)
+        rsi = ti.rsi(df, 7)
 
         if rsi < 70:
-            add_alert(symbol, 70, 'above', f"The RSI of {symbol} is above 70, indicating it may be overbought.", "rsi", market)
+            add_alert(symbol, 85, 'above', f"The RSI of {symbol} is above 85, indicating it may be overbought.", "rsi", market)
         if rsi > 30:
-            add_alert(symbol, 30, 'below', f"The RSI of {symbol} is below 30, indicating it may be oversold.", "rsi", market)
+            add_alert(symbol, 25, 'below', f"The RSI of {symbol} is below 25, indicating it may be oversold.", "rsi", market)
