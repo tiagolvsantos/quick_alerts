@@ -137,11 +137,12 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                 rsi = ti.rsi(qd.get_tradfi_historical_data(symbol))
             elif market == 'crypto':
                 rsi = ti.rsi(qd.get_crypto_historical_data(symbol))
-                if (rsi > level and move == 'above') or (rsi < level and move == 'below'):
-                    arrow = '↑' if move == 'above' else '↓'
-                    if run_alerts_command:
-                        tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
-                    print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                
+            if (rsi > level and move == 'above') or (rsi < level and move == 'below'):
+                arrow = '↑' if move == 'above' else '↓'
+                if run_alerts_command:
+                    tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
             else:
                 new_alerts.append(alert)
     _delete_alerts('automatic')
