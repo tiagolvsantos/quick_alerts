@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 from binance.client import Client
 
-
+client = Client(os.getenv('binance_api_key'), os.getenv('binance_api_secret'))
 
 def _delete_alerts(type):
     """
@@ -79,6 +79,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
     new_alerts = []
     counter = 0
     counter_hijack = 0
+    prev_open_interest= None
     for alert in alerts:
         symbol = alert['symbol']
         level = alert['level']
@@ -93,11 +94,12 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
 
         # Plug additional information to be shown
         counter_hijack+=1
-        if counter_hijack % 350 == 0:
+        if counter_hijack % 100 == 0:
             counter_hijack = 0
             get_binance_twap('BTCUSDT')
             get_binance_twap('ETHUSDT')
             get_binance_twap('SOLUSDT')
+            prev_open_interest = get_binance_oi_change('BTCUSDT', prev_open_interest)
             time.sleep(5)
         
 
@@ -126,7 +128,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                 arrow = '↑' if move == 'above' else '↓'
                 if run_alerts_command:
                     tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
-                print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
             else:
                 new_alerts.append(alert)
 
@@ -353,9 +355,6 @@ def create_rsi_alerts():
             add_alert(symbol, 25, 'below', f"The RSI of {symbol} is below 25, indicating it may be oversold.", "rsi", market)
 
 def get_binance_twap(symbol):
-    # Initialize the Binance client
-    client = Client(os.getenv('binance_api_key'), os.getenv('binance_api_secret'))
-
     # Get the historical trades
     trades = client.get_historical_trades(symbol=symbol)
 
@@ -371,3 +370,19 @@ def get_binance_twap(symbol):
 
 
     print(f'{dt_string} | {symbol}@{prices[-1]} -> TWAP: {round(twap,2)}')
+
+def get_binance_oi_change(symbol, prev_open_interest, threshold=1000):
+
+    # Get the open interest
+    open_interest = client.futures_open_interest(symbol=symbol)
+    oi = float(open_interest['openInterest'])
+    # If this is the first iteration, set prev_open_interest and continue
+    if prev_open_interest is None:
+        return oi
+
+
+    # If the open interest has changed drastically, print an alert
+    if abs(oi - float(prev_open_interest)) >= threshold:
+        print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | OI on {symbol} has changed drastically: {prev_open_interest} -> {oi}')
+
+    return oi
