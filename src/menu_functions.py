@@ -3,7 +3,12 @@ from src import quote_data as qd
 from src import telegram_con as tg
 from src import technical_indicators as ti
 import time
+import numpy as np
+import os
 from datetime import datetime
+from binance.client import Client
+
+
 
 def _delete_alerts(type):
     """
@@ -73,6 +78,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
     alerts = jf.read_alerts('alerts.json')
     new_alerts = []
     counter = 0
+    counter_hijack = 0
     for alert in alerts:
         symbol = alert['symbol']
         level = alert['level']
@@ -84,6 +90,16 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
         if counter % 25 == 0:
             counter = 0
             time.sleep(5) 
+
+        # Plug additional information to be shown
+        counter_hijack+=1
+        if counter_hijack % 350 == 0:
+            counter_hijack = 0
+            get_binance_twap('BTCUSDT')
+            get_binance_twap('ETHUSDT')
+            get_binance_twap('SOLUSDT')
+            time.sleep(5)
+        
 
         if market == 'tradfi':
             price = qd.get_stock_last_price(symbol)
@@ -119,7 +135,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                     arrow = '↑' if move == 'above' else '↓'
                     if run_alerts_command:
                         tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
-                    print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                    print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
                 else:
                     new_alerts.append(alert)
 
@@ -128,7 +144,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                 arrow = '↑' if move == 'above' else '↓'
                 if run_alerts_command:
                     tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
-                print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
             else:
                 new_alerts.append(alert)
 
@@ -142,7 +158,7 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                 arrow = '↑' if move == 'above' else '↓'
                 if run_alerts_command:
                     tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
-                print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
             else:
                 new_alerts.append(alert)
     _delete_alerts('automatic')
@@ -209,6 +225,7 @@ def print_manual_alerts():
     for alert in alerts:
         if alert['type'] == 'manual':
             print(f"${alert['symbol']}, Level: {alert['level']}, Move: {alert['move']}, Reason: {alert['reason']}")
+
 def delete_alerts_for_stock():
     """
     Deletes all alerts for a specific stock from the configuration file.
@@ -334,3 +351,23 @@ def create_rsi_alerts():
             add_alert(symbol, 85, 'above', f"The RSI of {symbol} is above 85, indicating it may be overbought.", "rsi", market)
         if rsi > 30:
             add_alert(symbol, 25, 'below', f"The RSI of {symbol} is below 25, indicating it may be oversold.", "rsi", market)
+
+def get_binance_twap(symbol):
+    # Initialize the Binance client
+    client = Client(os.getenv('binance_api_key'), os.getenv('binance_api_secret'))
+
+    # Get the historical trades
+    trades = client.get_historical_trades(symbol=symbol)
+
+    # Calculate the TWAP
+    prices = np.array([float(trade['price']) for trade in trades])
+    times = np.array([float(trade['time']) / 1000 for trade in trades])  # Convert to seconds
+    weights = np.diff(times, prepend=times[0])
+    twap = np.average(prices, weights=weights)
+
+    now = datetime.now()
+
+    dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
+
+
+    print(f'{dt_string} | {symbol}@{prices[-1]} -> TWAP: {round(twap,2)}')
