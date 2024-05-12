@@ -92,17 +92,6 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
             counter = 0
             time.sleep(5) 
 
-        # Plug additional information to be shown
-        counter_hijack+=1
-        if counter_hijack % 100 == 0:
-            counter_hijack = 0
-            get_binance_twap('BTCUSDT')
-            get_binance_twap('ETHUSDT')
-            get_binance_twap('SOLUSDT')
-            prev_open_interest = get_binance_oi_change('BTCUSDT', prev_open_interest)
-            time.sleep(5)
-        
-
         if market == 'tradfi':
             price = qd.get_stock_last_price(symbol)
         else:
