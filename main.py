@@ -2,7 +2,11 @@ import time
 import argparse
 from src import menu_functions as mf
 
-
+def set_play_sound(value):
+    global play_sound
+    play_sound = value
+    print(f"Sound is now {'enabled' if play_sound else 'disabled'}")
+    
 def main(run_alerts_command=False):
     """
     The main function that runs the menu loop.
@@ -16,9 +20,13 @@ def main(run_alerts_command=False):
     This function displays a menu and executes the corresponding function based on the user's choice.
     It keeps running in a loop until the user chooses to exit the program.
     """
+    global play_sound
+    play_sound = False
+
+    print(play_sound)
     menu_options = {
         '1': mf.add_alert_interactive,
-        '2': lambda: run_alerts(args.run_alerts_command),
+        '2': lambda: run_alerts(args.run_alerts_command, play_sound),
         '3': mf.delete_type_alerts,
         '4': mf.delete_alerts_for_stock,
         '5': mf.print_manual_alerts,
@@ -28,8 +36,8 @@ def main(run_alerts_command=False):
         '9': mf.create_bollinger_bands_alerts,
         '10': mf.create_rsi_alerts,       
         '11': exit_program,
+        'enable_sound': lambda: set_play_sound(True),
     }
-
     while True:
         print_menu()
         if not run_alerts_command:
@@ -45,11 +53,11 @@ def main(run_alerts_command=False):
             print('Invalid choice. Please try again.')
             choice = None  # Reset choice to prompt user for input in the next iteration
 
-def run_alerts(run_alerts_command):
+def run_alerts(run_alerts_command, play_sound):
     try:
         print("Running alerts...")
         while True:
-            mf.run_alerts(run_alerts_command, False)
+            mf.run_alerts(run_alerts_command, play_sound, False)
             time.sleep(1800)  # Sleep for 30 minutes
     except KeyboardInterrupt:
         print("Interrupted by user. Returning to main menu...")
@@ -73,6 +81,8 @@ def print_menu():
     print('9. Create alerts BBbands outside bands')
     print('10. Create alerts RSI')
     print('11. Exit')
+    print('OPTIONS______________________________')
+    print('enable_sound - Enable sound for alerts')
 
 
 if __name__ == "__main__":

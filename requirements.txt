@@ -4,3 +4,4 @@ requests
 yfinance
 argparse
 pyyaml
+pygame

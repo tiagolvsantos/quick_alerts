@@ -7,7 +7,9 @@ import numpy as np
 import os
 from datetime import datetime
 from binance.client import Client
-
+from os import environ
+environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1' 
+import pygame.mixer
 client = Client(os.getenv('binance_api_key'), os.getenv('binance_api_secret'))
 
 def _delete_alerts(type):
@@ -65,21 +67,23 @@ def add_alert(symbol, level, move, reason, alert_type, market='tradfi'):
     jf.write_alerts('alerts.json', alerts)
     print(f"Alert added for symbol {symbol} when it moves {move} {level}. Reason: {reason}")
 
-def run_alerts(run_alerts_command,asset_url_enabled=False):
+def run_alerts(run_alerts_command, play_sound, asset_url_enabled=False):
     """
     Runs the alerts based on the specified criteria.
 
     Args:
-        run_alerts_command (bool): Indicates whether to actually send the alerts or just print them.
-
-    Returns:
-        None
+        run_alerts_command (bool): Flag indicating whether to run the alerts or not.
+        play_sound (bool): Flag indicating whether to play a sound when an alert is triggered.
+        asset_url_enabled (bool, optional): Flag indicating whether to include asset URLs in the alert messages. Defaults to False.
     """
+    ## Alert sound
+    pygame.mixer.init()
+    pygame.mixer.music.load('.\\assets\\beep.mp3')
+
     alerts = jf.read_alerts('alerts.json')
     new_alerts = []
     counter = 0
-    counter_hijack = 0
-    prev_open_interest= None
+
     for alert in alerts:
         symbol = alert['symbol']
         level = alert['level']
@@ -118,6 +122,8 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                 if run_alerts_command:
                     tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
                 print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                if play_sound == True:
+                    pygame.mixer.music.play()
             else:
                 new_alerts.append(alert)
 
@@ -127,6 +133,8 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                     if run_alerts_command:
                         tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
                     print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                    if play_sound == True:
+                       pygame.mixer.music.play()
                 else:
                     new_alerts.append(alert)
 
@@ -136,6 +144,8 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                 if run_alerts_command:
                     tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
                 print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                if play_sound == True:
+                    pygame.mixer.music.play()
             else:
                 new_alerts.append(alert)
 
@@ -150,6 +160,8 @@ def run_alerts(run_alerts_command,asset_url_enabled=False):
                 if run_alerts_command:
                     tg.send_telegram_message(f'${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
                 print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | ${symbol} is now at {price} ({arrow} {level}). Reason: {reason} | {asset_url}')
+                if play_sound == True:
+                    pygame.mixer.music.play()
             else:
                 new_alerts.append(alert)
     _delete_alerts('automatic')
