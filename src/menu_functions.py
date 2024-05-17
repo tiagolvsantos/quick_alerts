@@ -87,11 +87,12 @@ def run_alerts(run_alerts_command, play_sound, asset_url_enabled=False):
     pygame.mixer.init()
     pygame.mixer.music.load('.\\assets\\beep.mp3')
 
-    alerts = jf.read_alerts('alerts_bulk.json')
+    alerts = jf.read_alerts('alerts.json')
     new_alerts = []
     counter = 0
 
     for alert in alerts:
+        print(alert)
         symbol = alert['symbol']
         level = alert['level']
         move = alert['move']
@@ -171,7 +172,7 @@ def run_alerts(run_alerts_command, play_sound, asset_url_enabled=False):
                     pygame.mixer.music.play()
             else:
                 new_alerts.append(alert)
-    _delete_alerts('automatic')
+    #_delete_alerts('automatic')
     jf.write_alerts('alerts.json', new_alerts)
 
 def _get_type():
