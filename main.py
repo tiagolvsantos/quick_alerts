@@ -36,7 +36,8 @@ def main(run_alerts_command=False):
         '9': mf.create_bollinger_bands_alerts,
         '10': mf.create_rsi_alerts,       
         '11': exit_program,
-        'enable_sound': lambda: set_play_sound(True),
+        's': lambda: set_play_sound(True),
+        'ba': mf.add_bulk_alerts,
     }
     while True:
         print_menu()
@@ -70,19 +71,22 @@ def print_menu():
     """
     Prints the menu.
     """
-    print('1. Add alert')
-    print('2. Run alerts')
-    print('3. Delete type alerts')
-    print('4. Delete alerts for a symbol')
-    print('5. Print manual alerts')
-    print('6. Print symbol alerts')
-    print('7. Create alerts for new highs/lows')
-    print('8. Create alerts 50 DMA')
-    print('9. Create alerts BBbands outside bands')
-    print('10. Create alerts RSI')
-    print('11. Exit')
+    print('MENU_________________________________')
+    print('1 -  Add alert')
+    print('2 -  Run alerts')
+    print('3 -  Delete type alerts')
+    print('4 -  Delete alerts for a symbol')
+    print('5 -  Print manual alerts')
+    print('6 -  Print symbol alerts')
+    print('7 -  Create alerts for new highs/lows')
+    print('8 -  Create alerts 50 DMA')
+    print('9 -  Create alerts BBbands outside bands')
+    print('10 - Create alerts RSI')
+    print('11 - Exit')
     print('OPTIONS______________________________')
-    print('enable_sound - Enable sound for alerts')
+    print('s -  Enable sound for alerts')
+    print('ba -  Add multiple alerts at once from bulk_alerts.xls file')
+    print()
 
 
 if __name__ == "__main__":

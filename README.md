@@ -12,16 +12,25 @@ This is a stock alert system written in Python. It allows users to set alerts fo
 
 ## Features
 
-1. **Add alert**: This option allows you to add a new alert.
-2. **Run alerts**: This option runs all the existing alerts.
-3. **Delete type alerts**: This option deletes alerts of a specific type.
-4. **Delete alerts for a symbol**: This option deletes all alerts associated with a specific symbol.
-5. **Print symbol alerts**: This option prints all alerts associated with a specific symbol.
-6. **Create alerts for new highs/lows**: This option creates alerts for new highs or lows.
-7. **Create alerts 50 DMA**: This option creates alerts for 50-day moving averages.
-8. **Create alerts BBbands outside bands**: This option creates alerts for Bollinger Bands outside the bands.
-9. **Create alerts RSI**: This option creates alerts for Relative Strength Index (RSI).
-10. **Exit**: This option allows you to exit the application.
+Our application provides a variety of features to help you manage your alerts:
+
+1. **Add Alert**: Add a new alert.
+2. **Run Alerts**: Run all existing alerts.
+3. **Delete Type Alerts**: Delete all alerts of a specific type.
+4. **Delete Alerts for a Symbol**: Delete all alerts associated with a specific symbol.
+5. **Print Manual Alerts**: Print all manual alerts.
+6. **Print Symbol Alerts**: Print all alerts associated with a specific symbol.
+7. **Create Alerts for New Highs/Lows**: Create alerts for new highs or lows.
+8. **Create Alerts 50 DMA**: Create alerts for 50-day moving averages.
+9. **Create Alerts BBbands Outside Bands**: Create alerts for Bollinger Bands outside bands.
+10. **Create Alerts RSI**: Create alerts for Relative Strength Index (RSI).
+11. **Exit**: Exit the application.
+
+### Options
+
+- **Enable Sound**: Enable sound for alerts.
+- **Add Bulk Alerts**: Add multiple alerts at once using a `bulk_alerts.xls` file.
+
 
 ## How to Run
 - If you want to run alerts on telegram:

@@ -5,11 +5,18 @@ from src import technical_indicators as ti
 import time
 import numpy as np
 import os
+import json
+import pandas as pd
 from datetime import datetime
 from binance.client import Client
 from os import environ
 environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1' 
 import pygame.mixer
+import warnings
+# Ignore pandas FutureWarning
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+
 client = Client(os.getenv('binance_api_key'), os.getenv('binance_api_secret'))
 
 def _delete_alerts(type):
@@ -80,7 +87,7 @@ def run_alerts(run_alerts_command, play_sound, asset_url_enabled=False):
     pygame.mixer.init()
     pygame.mixer.music.load('.\\assets\\beep.mp3')
 
-    alerts = jf.read_alerts('alerts.json')
+    alerts = jf.read_alerts('alerts_bulk.json')
     new_alerts = []
     counter = 0
 
@@ -387,3 +394,21 @@ def get_binance_oi_change(symbol, prev_open_interest, threshold=1000):
         print(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | OI on {symbol} has changed drastically: {prev_open_interest} -> {oi}')
 
     return oi
+
+def add_bulk_alerts():
+
+    df = pd.read_excel('data\\bulk_alerts.xls')
+
+    # Convert the dataframe to JSON format and save it
+    df.to_json('alerts_bulk.json', orient='records')
+
+    with open('alerts.json', 'r') as file:
+        alerts = json.load(file)
+
+    with open('alerts_bulk.json', 'r') as file:
+        bulk_alerts = json.load(file)
+
+    alerts += bulk_alerts
+
+    with open('alerts.json', 'w') as file:
+        json.dump(alerts, file)
