@@ -92,7 +92,6 @@ def run_alerts(run_alerts_command, play_sound, asset_url_enabled=False):
     counter = 0
 
     for alert in alerts:
-        print(alert)
         symbol = alert['symbol']
         level = alert['level']
         move = alert['move']
