@@ -1,6 +1,7 @@
 import time
 import argparse
 from src import menu_functions as mf
+from src import quote_data as qd
 
 def set_play_sound(value):
     global play_sound
@@ -32,7 +33,7 @@ def main(run_alerts_command=False):
         '5': mf.print_manual_alerts,
         '6': mf.print_symbol_alert,
         '7': lambda: [mf.create_alerts_for_new_highs(), mf.create_alerts_for_new_lows()],
-        '8': lambda: [mf.create_moving_average_alerts(50)],
+        '8': lambda: [mf.create_moving_average_alerts(50, qd.get_all_symbols()), mf.create_moving_average_alerts(100, qd.get_all_futures_symbols()), mf.create_moving_average_alerts(200, qd.get_all_futures_symbols())],
         '9': mf.create_bollinger_bands_alerts,
         '10': mf.create_rsi_alerts,       
         '11': exit_program,

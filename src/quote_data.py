@@ -139,3 +139,18 @@ def get_all_symbols():
             for item in yaml_content['symbols']:
                 list_symbols.append([item, market])
     return list_symbols
+
+def get_all_futures_symbols():
+    """
+    Returns a list of all stock symbols.
+    """
+    yaml_files = [f for f in os.listdir('data') if f.endswith('.yaml')]
+    list_symbols = []
+    for file in yaml_files:
+        if 'futures.yaml' in file:
+            with open(os.path.join('data', file), 'r') as f:
+                yaml_content = yaml.safe_load(f)
+                market = yaml_content.get('market')
+                for item in yaml_content['symbols']:
+                    list_symbols.append([item, market])
+    return list_symbols

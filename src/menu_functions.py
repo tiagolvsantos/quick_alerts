@@ -279,7 +279,7 @@ def create_alerts_for_new_lows():
             new_low = round(qd.get_crypto_historical_data(symbol)['close'].min(),2)
         add_alert(symbol, new_low, 'below', 'New low', "price", market)
 
-def create_moving_average_alerts(period):
+def create_moving_average_alerts(period, list_symbols):
     """
     Creates moving average alerts for a given period.
 
@@ -289,7 +289,6 @@ def create_moving_average_alerts(period):
     Returns:
     None
     """
-    list_symbols = qd.get_all_symbols()
     for record in list_symbols:
         market = record[1]
         symbol = record[0]

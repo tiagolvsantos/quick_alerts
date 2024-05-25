@@ -136,7 +136,6 @@ symbols:
   - NET
   - PANW
   - CHKP
-  - SPLK
   - BAC
   - WBA
   - WMT
@@ -248,6 +247,10 @@ symbols:
   - AMC
   - GME
   - SMCI
+  - S
+  - OKTA
+  - ZS
+  
   
 
 
